@@ -3,7 +3,12 @@ from io import BytesIO
 import cv2
 import os
 from PIL import Image
+import tensorflow as tf
 import numpy as np
+import matplotlib.pyplot as plt
+from object_detection.detection import extract_painting, image_to_bytes
+
+
 
 app = Flask(__name__)
 
@@ -33,10 +38,11 @@ def extract_picture_automatically(input_image_path, cascade_path='haarcascade_fr
     
 @app.route('/', methods=['GET'])
 def index():
-    return "Welcome to the Image Extract API!"
+    return "Image Extract API!"
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    print(request.files)
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
 
@@ -51,7 +57,7 @@ def upload_file():
         file.save(input_image_path)
 
         # Extract the region of interest
-        cropped_image = extract_picture_automatically(input_image_path)
+        cropped_image = extract_painting(input_image_path)
         os.remove(input_image_path)
         if cropped_image is not None:
             img_io = BytesIO()
